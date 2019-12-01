@@ -1,0 +1,9 @@
+.box-container {
+    &__line {
+        display: flex;
+    }
+    &__box {
+        height: 80px;
+        width: 80px;
+    }
+}
