@@ -23,12 +23,13 @@ export class BoxDraw extends Component {
     }
 
     handleClick = async (e) => {
-        console.log('box id:' + e.target.id, 'color is:' + e.target.style.backgroundColor)
-        const click = parseInt(e.target.id);
-        console.log(document.getElementById(click - 10).style.backgroundColor, 'up');
-        console.log(document.getElementById(click + 10).style.backgroundColor, 'down');
-        console.log(document.getElementById(click - 1).style.backgroundColor, 'left');
-        console.log(document.getElementById(click + 1).style.backgroundColor, 'right');
+        console.log('box id:' + e.target.id, 'row is:' + e.target.getAttribute('row'), 'color is:' + e.target.style.backgroundColor)
+        const toNumId = parseInt(e.target.id); //parse to num
+
+        // console.log(document.getElementById(toNumId - 10).style.backgroundColor, 'up');
+        // console.log(document.getElementById(toNumId + 10).style.backgroundColor, 'down');
+        // console.log(document.getElementById(toNumId - 1).style.backgroundColor, 'left');
+        // console.log(document.getElementById(toNumId + 1).style.backgroundColor, 'right');
         await this.setState({
             boxColorSelected: e.target.style.backgroundColor,
             boxIdSelected: e.target.id
@@ -39,14 +40,39 @@ export class BoxDraw extends Component {
     colorCheck = (id, colorId) => {
         const idNum = parseInt(id)
         console.log('wykonany', idNum, id)
-        // console.log(document.getElementById(idNum + 1).style.backgroundColor)
-        if (colorId == document.getElementById(idNum + 1).style.backgroundColor) {
-            console.log(true, 'color check');
-            document.getElementById(idNum + 1).style.backgroundColor = 'orange';
-            let number = document.getElementById(idNum + 1).id
-            console.log(number, 'trzeci box do sprawdzenia')
-            this.colorCheck(document.getElementById(idNum + 1).id, colorId);
-        } else { console.log(false, 'color check') }
+
+        switch (colorId) {
+
+            case document.getElementById(idNum + 1).style.backgroundColor:
+                console.log(true, 'color check right');
+                document.getElementById(idNum).style.backgroundColor = 'orange';
+                document.getElementById(idNum + 1).style.backgroundColor = 'orange';
+                let number = document.getElementById(idNum + 1).id
+                console.log(number, 'trzeci box do sprawdzenia')
+                this.colorCheck(document.getElementById(idNum + 1).id, colorId);
+                break;
+
+            case document.getElementById(idNum - 1).style.backgroundColor:
+                console.log(true, 'color check left');
+                document.getElementById(idNum - 1).style.backgroundColor = 'orange';
+                this.colorCheck(document.getElementById(idNum - 1).id, colorId);
+                break;
+
+            case document.getElementById(idNum + 10).style.backgroundColor:
+                console.log(true, 'color check left');
+                document.getElementById(idNum + 10).style.backgroundColor = 'orange';
+                this.colorCheck(document.getElementById(idNum + 10).id, colorId);
+                break;
+
+            case (document.getElementById(idNum - 10).style.backgroundColor ? document.getElementById(idNum - 10).style.backgroundColor: null):
+                console.log(true, 'color check left');
+                document.getElementById(idNum - 10).style.backgroundColor = 'orange';
+                this.colorCheck(document.getElementById(idNum - 10).id, colorId);
+                break;
+
+            default:
+                console.log(false, 'color check false')
+        }
     }
 
     countDown = (n) => {
@@ -56,13 +82,12 @@ export class BoxDraw extends Component {
 
 
     render() {
-        let box = [];
-        for (let i = 0; i < 10; i++) {
-            box.push(<div className="box-container__box" onClick={this.handleClick} key={i}></div>)
-        }
-
         let boxLine = [];
         for (let y = 0; y < 5; y++) {
+            let box = [];
+            for (let i = 0; i < 10; i++) {
+                box.push(<div className="box-container__box" onClick={this.handleClick} row={y + 1} key={i}></div>);
+            }
             boxLine.push(
                 <div className="box-container__line" key={y}>
                     {box}
