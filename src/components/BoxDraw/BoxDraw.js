@@ -1,13 +1,17 @@
 import React, { Component } from 'react';
 import './BoxDraw.scss';
 
+// const tab = [['1', '2'],['3', '4']];
+// console.log(tab[1][1])
+
 export class BoxDraw extends Component {
     constructor(props) {
         super(props)
         this.state = {
             colorArray: ['#173f5f', '#20639b', '#3caea3', '#f6d55c', '#ed553b'],
             boxColorSelected: [],
-            boxIdSelected: 0
+            boxIdSelected: 0,
+            boxRowSelected: 0
         }
     }
 
@@ -32,14 +36,15 @@ export class BoxDraw extends Component {
         // console.log(document.getElementById(toNumId + 1).style.backgroundColor, 'right');
         await this.setState({
             boxColorSelected: e.target.style.backgroundColor,
-            boxIdSelected: e.target.id
+            boxIdSelected: e.target.id,
+            boxRowSelected: e.target.getAttribute('row')
         });
-        this.colorCheck(this.state.boxIdSelected, this.state.boxColorSelected)
+        this.colorCheck(this.state.boxIdSelected, this.state.boxColorSelected, this.state.boxRowSelected)
     }
 
-    colorCheck = (id, colorId) => {
+    colorCheck = (id, colorId, row) => {
         const idNum = parseInt(id)
-        console.log('wykonany', idNum, id)
+        console.log('wykonany', idNum, id, row)
 
         switch (colorId) {
 
@@ -49,31 +54,34 @@ export class BoxDraw extends Component {
                 document.getElementById(idNum + 1).style.backgroundColor = 'orange';
                 let number = document.getElementById(idNum + 1).id
                 console.log(number, 'trzeci box do sprawdzenia')
-                this.colorCheck(document.getElementById(idNum + 1).id, colorId);
+                this.colorCheck(document.getElementById(idNum + 1).id, colorId, row);
                 break;
 
             case document.getElementById(idNum - 1).style.backgroundColor:
                 console.log(true, 'color check left');
                 document.getElementById(idNum - 1).style.backgroundColor = 'orange';
-                this.colorCheck(document.getElementById(idNum - 1).id, colorId);
+                this.colorCheck(document.getElementById(idNum - 1).id, colorId, row);
                 break;
 
-            case document.getElementById(idNum + 10).style.backgroundColor:
+            case (row != 5) ? document.getElementById(idNum + 10).style.backgroundColor : null:
                 console.log(true, 'color check left');
                 document.getElementById(idNum + 10).style.backgroundColor = 'orange';
-                this.colorCheck(document.getElementById(idNum + 10).id, colorId);
+                this.colorCheck(document.getElementById(idNum + 10).id, colorId, row);
                 break;
+            //sprawdzac czy nie jest undefined? do zrobienia
 
-            case (document.getElementById(idNum - 10).style.backgroundColor ? document.getElementById(idNum - 10).style.backgroundColor: null):
+            case (row != 1) ? document.getElementById(idNum - 10).style.backgroundColor : null:
                 console.log(true, 'color check left');
                 document.getElementById(idNum - 10).style.backgroundColor = 'orange';
-                this.colorCheck(document.getElementById(idNum - 10).id, colorId);
+                (row != 1) ? this.colorCheck(document.getElementById(idNum - 10).id, colorId, row) : console.log('sds');
                 break;
 
             default:
                 console.log(false, 'color check false')
         }
     }
+
+    // ogolnie to jest problem z przechodzeniem na dalszy row, współrzędne x/y i rozbijanie coś tam mi nie pasowało
 
     countDown = (n) => {
         console.log(n);
@@ -86,7 +94,7 @@ export class BoxDraw extends Component {
         for (let y = 0; y < 5; y++) {
             let box = [];
             for (let i = 0; i < 10; i++) {
-                box.push(<div className="box-container__box" onClick={this.handleClick} row={y + 1} key={i}></div>);
+                box.push(<div className="box-container__box" onClick={this.handleClick} row={y + 1} line={i + 1} key={i}></div>);
             }
             boxLine.push(
                 <div className="box-container__line" key={y}>
