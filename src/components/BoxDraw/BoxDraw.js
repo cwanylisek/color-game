@@ -11,7 +11,10 @@ export class BoxDraw extends Component {
             colorArray: ['#173f5f', '#20639b', '#3caea3', '#f6d55c', '#ed553b'],
             boxColorSelected: [],
             boxIdSelected: 0,
-            boxRowSelected: 0
+            boxRowSelected: 0,
+            rowCount: 5,
+            cellCount: 10,
+            score: 0
         }
     }
 
@@ -26,75 +29,93 @@ export class BoxDraw extends Component {
         }
     }
 
-    handleClick = async (e) => {
-        console.log('box id:' + e.target.id, 'row is:' + e.target.getAttribute('row'), 'color is:' + e.target.style.backgroundColor)
-        const toNumId = parseInt(e.target.id); //parse to num
-
-        // console.log(document.getElementById(toNumId - 10).style.backgroundColor, 'up');
-        // console.log(document.getElementById(toNumId + 10).style.backgroundColor, 'down');
-        // console.log(document.getElementById(toNumId - 1).style.backgroundColor, 'left');
-        // console.log(document.getElementById(toNumId + 1).style.backgroundColor, 'right');
-        await this.setState({
-            boxColorSelected: e.target.style.backgroundColor,
-            boxIdSelected: e.target.id,
-            boxRowSelected: e.target.getAttribute('row')
-        });
-        this.colorCheck(this.state.boxIdSelected, this.state.boxColorSelected, this.state.boxRowSelected)
-    }
-
-    colorCheck = (id, colorId, row) => {
-        const idNum = parseInt(id)
-        console.log('wykonany', idNum, id, row)
-
-        switch (colorId) {
-
-            case document.getElementById(idNum + 1).style.backgroundColor:
-                console.log(true, 'color check right');
-                document.getElementById(idNum).style.backgroundColor = 'orange';
-                document.getElementById(idNum + 1).style.backgroundColor = 'orange';
-                let number = document.getElementById(idNum + 1).id
-                console.log(number, 'trzeci box do sprawdzenia')
-                this.colorCheck(document.getElementById(idNum + 1).id, colorId, row);
-                break;
-
-            case document.getElementById(idNum - 1).style.backgroundColor:
-                console.log(true, 'color check left');
-                document.getElementById(idNum - 1).style.backgroundColor = 'orange';
-                this.colorCheck(document.getElementById(idNum - 1).id, colorId, row);
-                break;
-
-            case (row != 5) ? document.getElementById(idNum + 10).style.backgroundColor : null:
-                console.log(true, 'color check left');
-                document.getElementById(idNum + 10).style.backgroundColor = 'orange';
-                this.colorCheck(document.getElementById(idNum + 10).id, colorId, row);
-                break;
-            //sprawdzac czy nie jest undefined? do zrobienia
-
-            case (row != 1) ? document.getElementById(idNum - 10).style.backgroundColor : null:
-                console.log(true, 'color check left');
-                document.getElementById(idNum - 10).style.backgroundColor = 'orange';
-                (row != 1) ? this.colorCheck(document.getElementById(idNum - 10).id, colorId, row) : console.log('sds');
-                break;
-
-            default:
-                console.log(false, 'color check false')
+    componentDidUpdate(prevProps, prevState) {
+        if (this.state.score !== prevState.score) {
+            this.props.handler(this.state.score)
         }
     }
 
-    // ogolnie to jest problem z przechodzeniem na dalszy row, współrzędne x/y i rozbijanie coś tam mi nie pasowało
+    handleClick = async (e) => {
+        console.log('cell is:' + e.target.getAttribute('cell'), 'row is:' + e.target.getAttribute('row'), 'color is:' + e.target.style.backgroundColor)
 
-    countDown = (n) => {
-        console.log(n);
-        if (n >= 1) this.countDown(n - 1);
+        await this.setState({
+            boxColorSelected: e.target.style.backgroundColor,
+            boxIdSelected: e.target.getAttribute('cell'),
+            boxRowSelected: e.target.getAttribute('row')
+        });
+
+        this.colorCheck(parseInt(this.state.boxIdSelected), parseInt(this.state.boxRowSelected), this.state.boxColorSelected)
     }
 
+    colorCheck = (cell, row, colorId) => {
+        //sprawdzenie czy poza zakresem planszy
+        if (cell < this.state.cellCount && row < this.state.rowCount) {
+
+            console.log('cell', cell, 'row', row, 'colorId', colorId)
+
+            //góra czek
+            if (row > 0) {
+                if (colorId === document.querySelectorAll(`div[row="${row - 1}"][cell="${cell}"]`).item(0).style.backgroundColor) {
+                    console.log('góra');
+                    document.querySelectorAll(`div[row="${row}"][cell="${cell}"]`).item(0).style.backgroundColor = 'white'
+                    document.querySelectorAll(`div[row="${row - 1}"][cell="${cell}"]`).item(0).style.backgroundColor = 'white'
+                    this.colorCheck(cell, row - 1, colorId);
+                    this.setState({
+                        ...this.state.score,
+                        score: this.state.score + 1
+                    });
+                }
+            }
+            //dół czek
+            if (row < this.state.rowCount - 1) {
+                if (colorId === document.querySelectorAll(`div[row="${row + 1}"][cell="${cell}"]`).item(0).style.backgroundColor) {
+                    console.log('doł');
+                    document.querySelectorAll(`div[row="${row}"][cell="${cell}"]`).item(0).style.backgroundColor = 'white'
+                    document.querySelectorAll(`div[row="${row + 1}"][cell="${cell}"]`).item(0).style.backgroundColor = 'white'
+                    this.colorCheck(cell, row + 1, colorId);
+                    this.setState({
+                        ...this.state.score,
+                        score: this.state.score + 1
+                    });
+                }
+            }
+
+            //prawo czek
+            if (cell < this.state.cellCount - 1) {
+                if (colorId === document.querySelectorAll(`div[row="${row}"][cell="${cell + 1}"]`).item(0).style.backgroundColor) {
+                    console.log('prawo');
+                    document.querySelectorAll(`div[row="${row}"][cell="${cell}"]`).item(0).style.backgroundColor = 'white'
+                    document.querySelectorAll(`div[row="${row}"][cell="${cell + 1}"]`).item(0).style.backgroundColor = 'white'
+                    this.colorCheck(cell + 1, row, colorId);
+                    this.setState({
+                        ...this.state.score,
+                        score: this.state.score + 1
+                    });
+                }
+            }
+
+            //lewo czek
+            if (cell > 0) {
+                if (colorId === document.querySelectorAll(`div[row="${row}"][cell="${cell - 1}"]`).item(0).style.backgroundColor) {
+                    console.log('lewo');
+                    document.querySelectorAll(`div[row="${row}"][cell="${cell}"]`).item(0).style.backgroundColor = 'white'
+                    document.querySelectorAll(`div[row="${row}"][cell="${cell - 1}"]`).item(0).style.backgroundColor = 'white'
+                    this.colorCheck(cell - 1, row, colorId);
+                    this.setState({
+                        ...this.state.score,
+                        score: this.state.score + 1
+                    });
+                }
+            }
+        }
+    }
 
     render() {
         let boxLine = [];
-        for (let y = 0; y < 5; y++) {
+        for (let y = 0; y < this.state.rowCount; y++) {
             let box = [];
-            for (let i = 0; i < 10; i++) {
-                box.push(<div className="box-container__box" onClick={this.handleClick} row={y + 1} line={i + 1} key={i}></div>);
+            for (let i = 0; i < this.state.cellCount; i++) {
+                box.push(<div className="box-container__box" onClick={this.handleClick} row={y} cell={i} key={i}></div>);
             }
             boxLine.push(
                 <div className="box-container__line" key={y}>

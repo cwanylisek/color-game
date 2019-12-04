@@ -1,10 +1,10 @@
 import React from 'react';
-import { ScorePoints } from '../../components/ScorePoints/ScorePoints';
+import './ScoreCounter.scss';
 
-export const ScoreCounter = () => {
+export const ScoreCounter = (props) => {
     return (
-        <div>
-            <ScorePoints />
+        <div className="score">
+            Your score is: <span>{props.score}</span> points!
         </div>
     )
 }
